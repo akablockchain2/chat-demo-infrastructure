@@ -7,4 +7,5 @@
       5) username: {username}
       6) password: {password}
 7) navigate to `terraform` directory
-8) call `terraform apply`
+8) call `terraform init`
+9) call `terraform apply`

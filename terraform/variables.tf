@@ -1,3 +1,4 @@
+# Defines a variable for the AWS EKS cluster name
 variable "cluster_name" {
   default = "demo"
   type = string

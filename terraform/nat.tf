@@ -1,3 +1,4 @@
+# Creates an Elastic IP for the NAT gateway
 resource "aws_eip" "nat" {
   vpc = true
 
@@ -6,6 +7,7 @@ resource "aws_eip" "nat" {
   }
 }
 
+# Creates a NAT gateway in the specified subnet, using the allocated Elastic IP
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public-us-east-1a.id
@@ -17,6 +19,7 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [aws_internet_gateway.igw]
 }
 
+# Creates a private route table for the VPC and routes traffic to the NAT gateway
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
@@ -43,6 +46,7 @@ resource "aws_route_table" "private" {
   }
 }
 
+# Creates a public route table for the VPC and routes traffic to the internet gateway
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -69,21 +73,25 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Associates the private route table with the private subnet in availability zone us-east-1a
 resource "aws_route_table_association" "private-us-east-1a" {
   subnet_id      = aws_subnet.private-us-east-1a.id
   route_table_id = aws_route_table.private.id
 }
 
+# Associates the private route table with the private subnet in availability zone us-east-1b
 resource "aws_route_table_association" "private-us-east-1b" {
   subnet_id      = aws_subnet.private-us-east-1b.id
   route_table_id = aws_route_table.private.id
 }
 
+# Associates the public route table with the public subnet in availability zone us-east-1a
 resource "aws_route_table_association" "public-us-east-1a" {
   subnet_id      = aws_subnet.public-us-east-1a.id
   route_table_id = aws_route_table.public.id
 }
 
+# Associates the public route table with the public subnet in availability zone us-east-1b
 resource "aws_route_table_association" "public-us-east-1b" {
   subnet_id      = aws_subnet.public-us-east-1b.id
   route_table_id = aws_route_table.public.id

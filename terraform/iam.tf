@@ -1,3 +1,4 @@
+# Creates an IAM role for the EKS cluster with the required assume role policy
 resource "aws_iam_role" "demo" {
   name = "eks-cluster-demo"
 
@@ -17,11 +18,13 @@ resource "aws_iam_role" "demo" {
 POLICY
 }
 
+# Attaches the AmazonEKSClusterPolicy to the EKS cluster role
 resource "aws_iam_role_policy_attachment" "demo-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.demo.name
 }
 
+# Creates an IAM role for EKS node group with the required assume role policy
 resource "aws_iam_role" "nodes" {
   name = "eks-node-group-nodes"
 
@@ -37,36 +40,43 @@ resource "aws_iam_role" "nodes" {
   })
 }
 
+# Attaches the AmazonEKSWorkerNodePolicy to the node group role
 resource "aws_iam_role_policy_attachment" "nodes-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.nodes.name
 }
 
+# Attaches the AmazonEKS_CNI_Policy to the node group role
 resource "aws_iam_role_policy_attachment" "nodes-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.nodes.name
 }
 
+# Attaches the AmazonEC2ContainerRegistryReadOnly policy to the node group role
 resource "aws_iam_role_policy_attachment" "nodes-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.nodes.name
 }
 
+# Retrieves the TLS certificate for the EKS cluster OIDC issuer URL
 data "tls_certificate" "eks" {
   url = aws_eks_cluster.demo.identity[0].oidc[0].issuer
 }
 
+# Creates an OIDC provider for the EKS cluster
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.demo.identity[0].oidc[0].issuer
 }
 
+# Creates an IAM role for testing OIDC integration with the EKS cluster
 resource "aws_iam_role" "test_oidc" {
   assume_role_policy = data.aws_iam_policy_document.test_oidc_assume_role_policy.json
   name               = "test-oidc"
 }
 
+# Creates a custom IAM policy for testing purposes
 resource "aws_iam_policy" "test-policy" {
   name = "test-policy"
 
@@ -83,16 +93,19 @@ resource "aws_iam_policy" "test-policy" {
   })
 }
 
+# Attaches the custom test policy to the test OIDC role
 resource "aws_iam_role_policy_attachment" "test_attach" {
   role       = aws_iam_role.test_oidc.name
   policy_arn = aws_iam_policy.test-policy.arn
 }
 
+# Creates an IAM role for the EKS cluster autoscaler with the required assume role policy
 resource "aws_iam_role" "eks_cluster_autoscaler" {
   assume_role_policy = data.aws_iam_policy_document.eks_cluster_autoscaler_assume_role_policy.json
   name               = "eks-cluster-autoscaler"
 }
 
+# Creates a custom IAM policy for the EKS cluster autoscaler
 resource "aws_iam_policy" "eks_cluster_autoscaler" {
   name = "eks-cluster-autoscaler"
 
@@ -128,11 +141,13 @@ resource "aws_iam_policy" "eks_cluster_autoscaler" {
   })
 }
 
+# Attaches the custom EKS cluster autoscaler policy to the autoscaler role
 resource "aws_iam_role_policy_attachment" "eks_cluster_autoscaler_attach" {
   role       = aws_iam_role.eks_cluster_autoscaler.name
   policy_arn = aws_iam_policy.eks_cluster_autoscaler.arn
 }
 
+# Defines the IAM policy document for assuming the test OIDC role
 data "aws_iam_policy_document" "test_oidc_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -151,6 +166,7 @@ data "aws_iam_policy_document" "test_oidc_assume_role_policy" {
   }
 }
 
+# Defines the IAM policy document for assuming the EKS cluster autoscaler role
 data "aws_iam_policy_document" "eks_cluster_autoscaler_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]

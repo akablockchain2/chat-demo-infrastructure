@@ -1,6 +1,7 @@
+# Creates an Aurora PostgreSQL RDS cluster with specified parameters
 resource "aws_rds_cluster" "aurora_cluster" {
   engine         = "aurora-postgresql"
-  engine_version = "13.7" # Убедитесь, что эта версия доступна в вашем регионе
+  engine_version = "13.7"
   cluster_identifier = "aurora-cluster-demo"
   master_username    = local.db_credentials.username
   master_password    = local.db_credentials.password
@@ -14,6 +15,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   skip_final_snapshot = true
 }
 
+# Creates instances for the Aurora RDS cluster
 resource "aws_rds_cluster_instance" "aurora_instances" {
   count              = 2
   identifier         = "aurora-instance-${count.index}"
@@ -22,6 +24,7 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
   engine             = "aurora-postgresql"
 }
 
+# Creates a DB subnet group for the Aurora RDS cluster
 resource "aws_db_subnet_group" "default" {
   name       = "aurora-subnet-group"
   subnet_ids = [
@@ -34,14 +37,17 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
+# Retrieves the secret from AWS Secrets Manager that contains the Aurora DB credentials
 data "aws_secretsmanager_secret" "aurora_db_credentials" {
   name = "aurora-db-credentials2"
 }
 
+# Retrieves the latest version of the secret containing the Aurora DB credentials
 data "aws_secretsmanager_secret_version" "aurora_db_credentials" {
   secret_id = data.aws_secretsmanager_secret.aurora_db_credentials.id
 }
 
+# Decodes the JSON string containing the DB credentials from Secrets Manager
 locals {
   db_credentials = jsondecode(data.aws_secretsmanager_secret_version.aurora_db_credentials.secret_string)
 }

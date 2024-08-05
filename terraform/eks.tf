@@ -1,3 +1,4 @@
+# Creates an EKS cluster with specified parameters and dependencies
 resource "aws_eks_cluster" "demo" {
   name     = var.cluster_name
   role_arn = aws_iam_role.demo.arn
@@ -14,6 +15,7 @@ resource "aws_eks_cluster" "demo" {
   depends_on = [aws_iam_role_policy_attachment.demo-AmazonEKSClusterPolicy]
 }
 
+# Creates a node group for the EKS cluster with scaling parameters and dependencies
 resource "aws_eks_node_group" "private-nodes" {
   cluster_name    = aws_eks_cluster.demo.name
   node_group_name = "private-nodes"

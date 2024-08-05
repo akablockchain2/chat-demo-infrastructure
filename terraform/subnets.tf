@@ -1,3 +1,4 @@
+# Creates a private subnet in availability zone us-east-1a with specified CIDR block
 resource "aws_subnet" "private-us-east-1a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.0.0/19"
@@ -10,6 +11,7 @@ resource "aws_subnet" "private-us-east-1a" {
   }
 }
 
+# Creates a private subnet in availability zone us-east-1b with specified CIDR block
 resource "aws_subnet" "private-us-east-1b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.32.0/19"
@@ -22,6 +24,7 @@ resource "aws_subnet" "private-us-east-1b" {
   }
 }
 
+# Creates a public subnet in availability zone us-east-1a with specified CIDR block and enables public IP assignment on launch
 resource "aws_subnet" "public-us-east-1a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.64.0/19"
@@ -35,6 +38,7 @@ resource "aws_subnet" "public-us-east-1a" {
   }
 }
 
+# Creates a public subnet in availability zone us-east-1b with specified CIDR block and enables public IP assignment on launch
 resource "aws_subnet" "public-us-east-1b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.96.0/19"
